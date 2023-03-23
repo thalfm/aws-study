@@ -1,0 +1,17 @@
+Resources:
+  MyFunctionGeradorOrdemPagamento:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs14.x
+      CodeUri: .
+      Events:
+        MyApiGeradorOrdemPagamento:
+          Type: Api
+          Properties:
+            Path: /ordem-pagamento
+            Method: POST
+  MyApiGeradorOrdemPagamento:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: Prod

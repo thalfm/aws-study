@@ -1,0 +1,1 @@
+aws --profile=local cloudformation create-stack --stack-name=create-my-sqs --template-body=file://sns-sqs.yaml

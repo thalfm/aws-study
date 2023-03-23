@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  MySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: OrdensGeradasTopic
+      DisplayName: "Ordens geradas"
+      Tags:
+        - Key: Name
+          Value: OrdensGeradasTopic
+  MyDeadLetterQueue:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      QueueName: ordens-geradas-dlq
+  MySQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ordens-geradas
+      RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [MyDeadLetterQueue, Arn]
+          maxReceiveCount: 10
+  MySNSTopicToSQSPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt MySQSQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref MySNSTopic
+      Queues:
+        - !Ref MySQSQueue
+  MySNSTopicSubscription:
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !Ref MySNSTopic
+      Protocol: "sqs"
+      Endpoint: !GetAtt MySQSQueue.Arn
