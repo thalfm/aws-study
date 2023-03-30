@@ -1,0 +1,1 @@
+aws --profile=local cloudformation create-stack --stack-name=confirmar-envio-ordem-pagamento-lambda --template-body=file://lambda-confirmar-envio-ordem-pagamento.yaml --capabilities=CAPABILITY_NAMED_IAM

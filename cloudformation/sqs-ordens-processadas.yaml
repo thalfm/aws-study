@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  OrdensProcessadasDeadLetterQueue:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      QueueName: ordens-processadas-dlq
+  OrdensProcessadasSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ordens-processadas
+      RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [OrdensProcessadasDeadLetterQueue, Arn]
+          maxReceiveCount: 10

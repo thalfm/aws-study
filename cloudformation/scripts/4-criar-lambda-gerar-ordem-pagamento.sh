@@ -1,0 +1,1 @@
+aws --profile=local cloudformation create-stack --stack-name=gerar-ordem-pagamento-lambda --template-body=file://lambda-gerador-ordem-pagamento.yaml --capabilities=CAPABILITY_NAMED_IAM

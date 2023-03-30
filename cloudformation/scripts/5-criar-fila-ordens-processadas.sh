@@ -1,0 +1,1 @@
+aws --profile=local cloudformation create-stack --stack-name=criar-ordens-processadas-queue --template-body=file://sqs-ordens-processadas.yaml
