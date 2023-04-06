@@ -1,1 +1,1 @@
-aws --profile=local cloudformation create-stack --stack-name=create-my-sqs --template-body=file://sns-sqs.yaml
+aws --profile=local cloudformation create-stack --stack-name=create-ordens-geradas-sns --template-body=file://sns-sqs-ordens-geradas.yaml
