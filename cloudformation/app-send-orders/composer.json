@@ -1,0 +1,11 @@
+{
+    "name": "root/www",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {
+        "symfony/console": "^6.0"
+    }
+}
