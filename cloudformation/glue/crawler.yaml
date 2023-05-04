@@ -1,0 +1,28 @@
+Parameters:
+  CrawlerName:
+    Type: String
+    Description: Nome do AWS Glue Crawler
+  DataBaseName:
+    Type: String
+    Description: Nome da base de dados do AWS Glue Catalog
+  TableName:
+    Type: String
+    Description: Nome da tabela do AWS Glue Catalog
+  RoleArn:
+    Type: String
+    Description: ARN da role usada no crawler
+Resources:
+  MyCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Ref CrawlerName
+      Role: !Ref RoleArn
+      DatabaseName: !Ref DataBaseName
+      Targets:
+        CatalogTargets:
+          - DatabaseName: !Ref DataBaseName
+            Tables:
+              - !Ref TableName
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
