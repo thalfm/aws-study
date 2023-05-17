@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  RepositoryName:
+    Type: String
+    Description: Nome do repositório do ECR
+  RetentionDays:
+    Type: Number
+    Description: Dias para manter imagens no repositório
+    Default: 30
+Resources:
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref RepositoryName
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: !Sub |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Manter as últimas imagens por ${RetentionDays} dias",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": ${RetentionDays}
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+Outputs:
+  ECRRepositoryURL:
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${RepositoryName}"
+    Description: URL do repositório ECR
