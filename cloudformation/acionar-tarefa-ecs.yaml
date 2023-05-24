@@ -1,4 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  aws_acess_key:
+    Type: String
+    Description: variable acess key
+  aws_secret_key:
+    Type: String
+    Description: variable secret key
 Resources:
   AcionarTarefaEcsLambda:
     Type: 'AWS::Lambda::Function'
@@ -10,7 +17,11 @@ Resources:
       Handler: index.handler
       Role: !GetAtt AcionarTarefaEcs.Arn
       Runtime: nodejs14.x
-
+    Environment:
+      Variables:
+        AWS_SQS_URL_ORDERS_SEND: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/ordens-processadas'
+        AWS_ACCESS_KEY: ""
+        AWS_SECRET_KEY: ""
   AcionarTarefaEcsRole:
     Type: 'AWS::IAM::Role'
     Properties:
