@@ -26,4 +26,6 @@ Resources:
       ContainerDefinitions:
         - Name: integracao-erp
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${RepositoryName}"
-
+          Environment:
+            - Name: command
+              Value: 'php,src/console.php,app:send-orders'
