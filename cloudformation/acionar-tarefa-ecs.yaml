@@ -1,11 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
-  aws_acess_key:
+  ecsClusterName:
     Type: String
-    Description: variable acess key
-  aws_secret_key:
+    Description: variable ecs cluster name
+  ecsTaskDefinition:
     Type: String
-    Description: variable secret key
+    Description: variable task definition name
+  ecsTaskSubnets:
+    Type: String
+    Description: variable list of subnets ids
+  ecsSecurityGroups:
+    Type: String
+    Description: variable list of security groups ids
 Resources:
   AcionarTarefaEcsLambda:
     Type: 'AWS::Lambda::Function'
@@ -15,13 +21,15 @@ Resources:
         S3Key: acionar-tarefa-ecs.zip
       FunctionName: acionar-tarefa-ecs
       Handler: index.handler
-      Role: !GetAtt AcionarTarefaEcs.Arn
+      Role: !GetAtt AcionarTarefaEcsRole.Arn
       Runtime: nodejs14.x
-    Environment:
-      Variables:
-        AWS_SQS_URL_ORDERS_SEND: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/ordens-processadas'
-        AWS_ACCESS_KEY: ""
-        AWS_SECRET_KEY: ""
+      Environment:
+        Variables:
+          AWS_SQS_URL_ORDERS_SEND: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/ordens-processadas'
+          ECS_CLUSTER_NAME: !Ref ecsClusterName
+          ECS_TASK_DEFINITION: !Ref ecsTaskDefinition
+          ECS_TASK_SUBNETS: !Ref ecsTaskSubnets
+          ECS_SECURITY_GROUPS: !Ref ecsSecurityGroups
   AcionarTarefaEcsRole:
     Type: 'AWS::IAM::Role'
     Properties:

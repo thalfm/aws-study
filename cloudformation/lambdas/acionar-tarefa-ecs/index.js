@@ -4,18 +4,18 @@ const ecs = new AWS.ECS();
 
 const environment = {
     taskconfiguration: {
-        cluster: env.get('ECS_CLUSTER_NAME').required().asString(),
+        cluster: process.env.ECS_CLUSTER_NAME,
         launchType: 'FARGATE',
         count: 1,
-        taskDefinition: env.get('ECS_TASK_DEFINITION').required().asString(),
+        taskDefinition: process.env.ECS_TASK_DEFINITION,
         platformVersion: 'LATEST',
     },
     containerConfiguration: {
         name: 'integracao-erp'
     },
     network: {
-        subnets: env.get('ECS_TASK_SUBNETS').required().asArray(),
-        securityGroups: env.get('ECS_SECURITY_GROUPS').required().asArray(),
+        subnets: process.env.ECS_TASK_SUBNETS.split(","),
+        securityGroups: process.env.ECS_SECURITY_GROUPS.split(","),
         assignPublicIp: "ENABLED",
     }
 }
@@ -33,16 +33,8 @@ const scheduleEcs = async (data, environment) => {
                             value: data
                         },
                         {
-                            name: 'AWS_ACCESS_KEY',
-                            value: env.get('AWS_ACCESS_KEY').required().asString(),
-                        },
-                        {
-                            name: 'AWS_SECRET_KEY',
-                            value: env.get('AWS_SECRET_KEY').required().asString(),
-                        },
-                        {
                             name: 'AWS_SQS_URL_ORDERS_SEND',
-                            value: env.get('AWS_SQS_URL_ORDERS_SEND').required().asString(),
+                            value: process.env.AWS_SQS_URL_ORDERS_SEND,
                         }
                     ]
                 }

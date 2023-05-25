@@ -26,8 +26,19 @@ zip acionar-tarefa-ecs.zip index.js
 aws --profile=cloudguru s3 cp acionar-tarefa-ecs.zip s3://otp-lambdas/acionar-tarefa-ecs.zip
 cd ../../
 
+export ecs_cluster_name="my-cluster-name"
+export ecs_task_definition="my-task-family:2"
+export ecs_task_subnets=subnet-0a8ed8a14977c2523
+export ecs_security_groups='sg-02f26c7760149e103'
 # 7-criar-lambda-enviar-ordem-pagamento.sh
-aws --profile=cloudguru cloudformation create-stack --stack-name=acionar-tarefa-ecs-lambda --template-body=file://acionar-tarefa-ecs.yaml --capabilities=CAPABILITY_NAMED_IAM
+aws --profile=local cloudformation create-stack --stack-name=acionar-tarefa-ecs-lambda --template-body=file://acionar-tarefa-ecs.yaml --capabilities=CAPABILITY_NAMED_IAM --parameters ParameterKey=ecsClusterName,ParameterValue="$ecs_cluster_name" \
+                 ParameterKey=ecsTaskDefinition,ParameterValue="$ecs_task_definition" \
+                 ParameterKey=ecsTaskSubnets,ParameterValue="$ecs_task_subnets" \
+                 ParameterKey=ecsSecurityGroups,ParameterValue="$ecs_security_groups"
+
+
+
+
 
 # 8-lambda-confirmar-envio-ordem-pagamento-deploy.sh
 cd lambdas/confirmar-envio-ordem-pagamento
