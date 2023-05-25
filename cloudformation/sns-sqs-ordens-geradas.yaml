@@ -39,6 +39,7 @@ Resources:
   MySNSTopicSubscription:
     Type: "AWS::SNS::Subscription"
     Properties:
+      RawMessageDelivery: true
       TopicArn: !Ref MySNSTopic
       Protocol: "sqs"
       Endpoint: !GetAtt MySQSQueue.Arn
