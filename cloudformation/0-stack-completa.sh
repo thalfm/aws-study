@@ -1,66 +1,71 @@
 #!/bin/bash
 
-# create bucket
+
+# 1 - criar o ecr
+aws --profile=cloudguru cloudformation create-stack --stack-name=criar-ecr --template-body=file://ecr.yaml --parameters=ParameterKey=RepositoryName,ParameterValue=app-send-orders
+
+# 2 - criar a vpc
+aws --profile=cloudguru cloudformation create-stack --stack-name=criar-vpc --template-body=file://vpc-three-tier.yaml
+
+# 3 - criar o cluster
+aws --profile=cloudguru cloudformation create-stack --stack-name=criar-ecs-cluster --template-body=file://ecs-cluster.yaml --parameters=ParameterKey=RepositoryName,ParameterValue=app-send-orders
+
+# 4 create bucket
 aws --profile=cloudguru cloudformation create-stack --stack-name=create-my-bucket --template-body=file://bucket.yaml
 
-# create sns sqs
+# 5 create sns sqs
 aws --profile=cloudguru cloudformation create-stack --stack-name=create-ordens-geradas-sns --template-body=file://sns-sqs-ordens-geradas.yaml
 
-# create lambda gerar ordem-pagamento
-cd lambdas/gerador-ordem-pagamento
-rm -v gerador-ordem-pagamento.zip
-zip gerador-ordem-pagamento.zip index.js
-aws --profile=cloudguru s3 cp gerador-ordem-pagamento.zip s3://otp-lambdas/gerador-ordem-pagamento.zip
+# 6 create lambda gerar ordem-pagamento
+cd lambdas/gerador-ordem-pagamento &&
+zip gerador-ordem-pagamento.zip index.js &&
+aws --profile=cloudguru s3 cp gerador-ordem-pagamento.zip s3://otp-lambdas/gerador-ordem-pagamento.zip &&
 cd ../../
 
-# 4 create lambda gerar ordem-pagamento
+# 5 create lambda gerar ordem-pagamento
 aws --profile=cloudguru cloudformation create-stack --stack-name=gerar-ordem-pagamento-lambda --template-body=file://lambda-gerador-ordem-pagamento.yaml --capabilities=CAPABILITY_NAMED_IAM
 
-# 5 create fila-ordens processadas
+# 6 create fila-ordens processadas
 aws --profile=cloudguru cloudformation create-stack --stack-name=criar-ordens-processadas-queue --template-body=file://sqs-ordens-processadas.yaml
 
-# 6 create lambda acionar tarefa ecs deploy
-cd lambdas/acionar-tarefa-ecs
-rm -v acionar-tarefa-ecs.zip
-zip acionar-tarefa-ecs.zip index.js
-aws --profile=cloudguru s3 cp acionar-tarefa-ecs.zip s3://otp-lambdas/acionar-tarefa-ecs.zip
+# 7 create lambda acionar tarefa ecs deploy
+cd lambdas/acionar-tarefa-ecs &&
+zip acionar-tarefa-ecs.zip index.js && 
+aws --profile=cloudguru s3 cp acionar-tarefa-ecs.zip s3://otp-lambdas/acionar-tarefa-ecs.zip &&
 cd ../../
 
-export ecs_cluster_name="my-cluster-name"
-export ecs_task_definition="my-task-family:2"
-export ecs_task_subnets=subnet-0a8ed8a14977c2523
-export ecs_security_groups='sg-02f26c7760149e103'
-# 7-criar-lambda-enviar-ordem-pagamento.sh
-aws --profile=local cloudformation create-stack --stack-name=acionar-tarefa-ecs-lambda --template-body=file://acionar-tarefa-ecs.yaml --capabilities=CAPABILITY_NAMED_IAM --parameters ParameterKey=ecsClusterName,ParameterValue="$ecs_cluster_name" \
+export ecs_cluster_name="my-cluster-name" &&
+export ecs_task_definition="my-task-family:2" &&
+export ecs_task_subnets=subnet-0cc3bd8ce28b892f2 &&
+export ecs_security_groups='sg-014b70627780d0be4'
+# 9 criar-lambda-enviar-ordem-pagamento.sh
+aws --profile=cloudguru cloudformation create-stack --stack-name=acionar-tarefa-ecs-lambda --template-body=file://acionar-tarefa-ecs.yaml --capabilities=CAPABILITY_NAMED_IAM --parameters ParameterKey=ecsClusterName,ParameterValue="$ecs_cluster_name" \
                  ParameterKey=ecsTaskDefinition,ParameterValue="$ecs_task_definition" \
                  ParameterKey=ecsTaskSubnets,ParameterValue="$ecs_task_subnets" \
                  ParameterKey=ecsSecurityGroups,ParameterValue="$ecs_security_groups"
 
 
-
-
-
-# 8-lambda-confirmar-envio-ordem-pagamento-deploy.sh
-cd lambdas/confirmar-envio-ordem-pagamento
-rm -v confirmar-envio-ordem-pagamento.zip
-zip confirmar-envio-ordem-pagamento.zip index.js
-aws --profile=cloudguru s3 cp confirmar-envio-ordem-pagamento.zip s3://otp-lambdas/confirmar-envio-ordem-pagamento.zip
+# 10 lambda-confirmar-envio-ordem-pagamento-deploy.sh
+cd lambdas/confirmar-envio-ordem-pagamento &&
+zip confirmar-envio-ordem-pagamento.zip index.js &&
+aws --profile=cloudguru s3 cp confirmar-envio-ordem-pagamento.zip s3://otp-lambdas/confirmar-envio-ordem-pagamento.zip && 
 cd ../../
 
-# 9 -criar-lambda-confirmar-envio-ordem-pagamento.sh
+# 11 criar-lambda-confirmar-envio-ordem-pagamento.sh
 aws --profile=cloudguru cloudformation create-stack --stack-name=confirmar-envio-ordem-pagamento-lambda --template-body=file://lambda-confirmar-envio-ordem-pagamento.yaml --capabilities=CAPABILITY_NAMED_IAM
 
-# 10 - criar o ecr
-aws --profile=cloudguru cloudformation create-stack --stack-name=criar-ecr --template-body=file://ecr.yaml --parameters=ParameterKey=RepositoryName,ParameterValue=app-send-orders
-
-# 11 - criar a vpc
-aws --profile=cloudguru cloudformation create-stack --stack-name=criar-vpc --template-body=file://vpc-three-tier.yaml
-
-# 12 - criar o cluster
-aws --profile=cloudguru cloudformation create-stack --stack-name=criar-ecs-cluster --template-body=file://ecs-cluster.yaml --parameters=ParameterKey=RepositoryName,ParameterValue=app-send-orders
-
-
+# 12 criar-lambda-confirmar-envio-ordem-pagamento.sh
+aws --profile=cloudguru lambda add-permission \
+    --function-name "my-log-watch-sns-feeder" \
+    --statement-id "my-log-watch-sns-feeder" \
+    --principal "logs.amazonaws.com" \
+    --action "lambda:InvokeFunction" \
+    --source-arn "arn:aws:logs:us-east-1:744176206000:log-group:/ecs/my-task-family:*" \
+    --source-account "744176206000"
 
 
-
-
+# 13 criar-lambda-confirmar-envio-ordem-pagamento.sh
+aws --profile=cloudguru  logs put-subscription-filter 
+--log-group-name /aws/ecs/mycontainer 
+--destination-arn arn:aws:lambda:us-east-1:744176206000:function:my-log-watch-sns-feeder
+--filter-name container-errors --filter-pattern "ERROR"
