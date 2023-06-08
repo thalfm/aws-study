@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  LogWatchEcsFeederLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: log-watch-ecs-lambda-execution-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  LogWatchEcsFeederFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: otp-lambdas
+        S3Key: log-watch-ecs-feeder.zip
+      FunctionName: log-watch-ecs-feeder
+      Handler: index.handler
+      Role: !GetAtt LogWatchEcsFeederLambdaExecutionRole.Arn
+      Runtime: nodejs14.x
+  FiltersErrorsEcsIntegracaoErp:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      LogGroupName: 'log-group-ecs-integracao-erp'
+      FilterPattern: 'Error'
+      DestinationArn: !GetAtt LogWatchEcsFeederFunction.Arn
+  LogWatchEcsFeederFunctionLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !GetAtt LogWatchEcsFeederFunction.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: "logs.amazonaws.com"
+      SourceArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:log-group-ecs-integracao-erp:*"
