@@ -1,0 +1,23 @@
+service: acionar-tarefa-ecs
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  profile: cloudguru
+
+functions:
+  acionar-tarefa-consumer:
+    handler: index.consumer
+    role: !Sub arn:aws:iam::${AWS::AccountId}:role/${sls:stage}-ordens-geradas
+    events:
+      - sqs:
+           arn:
+             Fn::Join:
+              - ':'
+              - - arn
+                - aws
+                - sqs
+                - Ref: AWS::Region
+                - Ref: AWS::AccountId
+                - ${sls:stage}-ordens-geradas
