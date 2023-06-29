@@ -1,0 +1,21 @@
+service: gerador-ordem-pagamento
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  profile: cloudguru
+  vpc:
+    securityGroupIds:
+      - sg-0a89678e0708ccbc5
+    subnetIds:
+      - subnet-022fdfc6b6e417957
+      - subnet-04dc1bd1d18be3dca 
+      
+functions:
+  api:
+    handler: index.handler
+    events:
+      - httpApi:
+          path: /
+          method: get
