@@ -2,16 +2,18 @@
     {
         "name": "${container_name}",
         "image": "${container_image}",
+        "memory": 128,
+        "cpu": 10,
         "portMappings": [{
-            "containerPort": "${container_port}",
-            "hostPort": "${host_port}"
+            "containerPort": ${container_port},
+            "hostPort": ${host_port}
         }],
         "command": ["php","src/console.php","app:send-orders"],
         "logConfiguration": {
-            "logDriver": "awsLog",
+            "logDriver": "awslogs",
             "options": {
                 "awslogs-group": "${log_group}",
-                "awslogs-region": "${var.region}",
+                "awslogs-region": "${region}",
                 "awslogs-stream-prefix": "lab" 
             }
         }

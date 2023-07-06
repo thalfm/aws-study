@@ -22,3 +22,11 @@ resource "aws_subnet" "private" {
         "Name" = "subnet_private"
     }
 }
+
+output "subnet_private_1" {
+  value = aws_subnet.private[0].id
+}
+
+output "subnet_private_2" {
+  value = aws_subnet.private[1].id
+}
