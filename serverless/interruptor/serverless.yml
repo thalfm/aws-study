@@ -1,0 +1,24 @@
+service: interruptor
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  interruptor:
+    handler: index.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - aws.cloudwatch
+            detail-type:
+              - CloudWatch Alarm State Change
+            detail:
+              state:
+                - "ALARM"
+            resources:
+              - ""
+          input:
+            enable: false
