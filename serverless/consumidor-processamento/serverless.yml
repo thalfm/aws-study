@@ -10,10 +10,11 @@ functions:
   consumidorProcessamento:
     name: 'consumidor-processamento'
     handler: index.handler
+    disableLogs: true
+    role: !Sub arn:aws:iam::${AWS::AccountId}:role/dev-recorrencia
     events:
       - sqs:
           batchSize: 1
-          maximumConcurrency: ${env:AWS_LAMBDA_MAXIMUM_CONCURRENCY, 10}
           arn:
             Fn::Join:
               - ':'
@@ -22,5 +23,5 @@ functions:
                 - sqs
                 - Ref: AWS::Region
                 - Ref: AWS::AccountId
-                - consumidor-processamento-sqs
+                - dev-recorrencia
 

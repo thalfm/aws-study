@@ -1,18 +1,15 @@
 resource "aws_cloudwatch_composite_alarm" "composite_failure_alarm" {
   alarm_description = "Monitors error percentage and error sum of lambda function consumidor-processamento"
-  alarm_name        = "example-composite-alarm"
+  alarm_name        = "composite_failure_alarm"
 
-  alarm_rule = <<EOF
-ALARM(${aws_cloudwatch_metric_alarm.failure_percentage_alarm.failure_percentage_alarm}) AND
-ALARM(${aws_cloudwatch_metric_alarm.failure_sum_alarm.failure_sum_alarm})
-EOF
+  alarm_rule = "ALARM(${aws_cloudwatch_metric_alarm.failure_percentage_alarm.alarm_name}) AND ALARM(${aws_cloudwatch_metric_alarm.failure_sum_alarm.alarm_name})"
 }
 
 resource "aws_cloudwatch_metric_alarm" "failure_percentage_alarm" {
   alarm_name                = "failure_percentage_alarm"
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = 1
-  threshold                 = 50
+  threshold                 = 10
   alarm_description         = "This metric monitors failures lambda"
 
   metric_query {
@@ -52,7 +49,7 @@ resource "aws_cloudwatch_metric_alarm" "failure_sum_alarm" {
   period                    = 10
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = 1
-  threshold                 = 50
+  threshold                 = 10
   alarm_description         = "This metric monitors failures lambda"
   statistic                 = "Sum"
   treat_missing_data         = "notBreaching"

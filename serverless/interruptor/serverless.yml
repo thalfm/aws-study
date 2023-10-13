@@ -4,6 +4,7 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
+  profile:
 
 functions:
   interruptor:
@@ -17,8 +18,8 @@ functions:
               - CloudWatch Alarm State Change
             detail:
               state:
-                - "ALARM"
+                value: ["ALARM"]
             resources:
-              - ""
+              - "arn:aws:cloudwatch:us-east-1:237976457746:alarm:composite_failure_alarm"
           input:
             enable: false
