@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_composite_alarm" "composite_failure_alarm" {
-  alarm_description = "Monitors error percentage and error sum of lambda function consumidor-processamento"
+  alarm_description = "Monitors error percentage and error sum of lambda function ${var.target_function_name}"
   alarm_name        = "composite_failure_alarm"
 
   alarm_rule = "ALARM(${aws_cloudwatch_metric_alarm.failure_percentage_alarm.alarm_name}) AND ALARM(${aws_cloudwatch_metric_alarm.failure_sum_alarm.alarm_name})"
@@ -23,7 +23,7 @@ resource "aws_cloudwatch_metric_alarm" "failure_percentage_alarm" {
     return_data = false
     metric {
       metric_name = "Errors"
-      namespace   = "lambda-circuit-breaker-consumidor-processamento"
+      namespace   = "lambda-circuit-breaker-${var.target_function_name}"
       period      = 10
       stat        = "Sum"
     }
@@ -35,7 +35,7 @@ resource "aws_cloudwatch_metric_alarm" "failure_percentage_alarm" {
 
     metric {
       metric_name = "Invocations"
-      namespace   = "lambda-circuit-breaker-consumidor-processamento"
+      namespace   = "lambda-circuit-breaker-${var.target_function_name}"
       period      = 10
       stat        = "Sum"
     }
@@ -45,7 +45,7 @@ resource "aws_cloudwatch_metric_alarm" "failure_percentage_alarm" {
 resource "aws_cloudwatch_metric_alarm" "failure_sum_alarm" {
   alarm_name                = "failure_sum_alarm"
   metric_name               = "Errors"
-  namespace                 = "lambda-circuit-breaker-consumidor-processamento"
+  namespace                 = "lambda-circuit-breaker-${var.target_function_name}"
   period                    = 10
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = 1

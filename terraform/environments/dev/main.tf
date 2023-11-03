@@ -26,13 +26,19 @@ data "aws_caller_identity" "current" {}
 #    region = "${var.region}"
 #}
 
-module "circuit-breaker" {
-    source = "../../infra/circuit-breaker"
-}
 
 module "recorrencia" {
     source = "../../infra/recorrencia"
     environment = "${var.environment}"
+    region = "${var.region}"
+    account_id = "${data.aws_caller_identity.current.account_id}"
+}
+
+module "circuit_breaker_recorrencia" {
+    source = "../../infra/circuit-breaker"
+    target_function_name = "consumidor-processamento"
+    target_queue_name = module.recorrencia.aws_sqs_queue_recorrencia_name
+    target_queue_arn = module.recorrencia.aws_sqs_queue_recorrencia_arn
     region = "${var.region}"
     account_id = "${data.aws_caller_identity.current.account_id}"
 }
