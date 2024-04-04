@@ -14,6 +14,14 @@ variable "aws_lambda_bucket_name" {
 
 }
 
+variable "cloudwatch_composite_failure_alarm_arn" {
+
+}
+
+variable "cloudwatch_composite_failure_alarm_name" {
+
+}
+
 variable "account_id" {
 
 }

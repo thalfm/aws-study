@@ -9,6 +9,8 @@ module "bucket" {
 
 module "lambda" {
   source = "./lambda"
+  cloudwatch_composite_failure_alarm_arn = module.cloudwatch.cloudwatch_composite_failure_alarm_arn
+  cloudwatch_composite_failure_alarm_name = module.cloudwatch.cloudwatch_composite_failure_alarm_name
   target_function_name = var.target_function_name
   target_queue_name = var.target_queue_name
   target_queue_arn = var.target_queue_arn

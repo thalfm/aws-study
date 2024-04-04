@@ -54,3 +54,11 @@ resource "aws_cloudwatch_metric_alarm" "failure_sum_alarm" {
   statistic                 = "Sum"
   treat_missing_data         = "notBreaching"
 }
+
+output "cloudwatch_composite_failure_alarm_arn" {
+  value = aws_cloudwatch_composite_alarm.composite_failure_alarm.arn
+}
+
+output "cloudwatch_composite_failure_alarm_name" {
+  value = aws_cloudwatch_composite_alarm.composite_failure_alarm.alarm_name
+}

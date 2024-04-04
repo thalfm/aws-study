@@ -35,6 +35,41 @@ resource "aws_lambda_function" "update_event_source" {
   }
 }
 
+resource "aws_cloudwatch_event_rule" "open_circuit_rule" {
+  name        = "open_circuit_rule"
+  description = "CloudWatch Alarm State Change"
+
+  event_pattern = jsonencode({
+    source = [
+      "aws.cloudwatch"
+    ]
+    detail-type = [
+      "CloudWatch Alarm State Change"
+    ]
+    detail = {
+      state = {
+        value = [
+          "ALARM"
+        ]
+      }
+      "alarmName": [
+        var.cloudwatch_composite_failure_alarm_name
+      ]
+    }
+
+    resources = [
+      var.cloudwatch_composite_failure_alarm_arn
+    ]
+  })
+}
+
+resource "aws_cloudwatch_event_target" "open_circuit_rule_target" {
+  rule      = aws_cloudwatch_event_rule.open_circuit_rule.name
+  target_id = "InvokeOpenCircuit"
+  arn       = aws_lambda_function.update_event_source.arn
+  input     = jsonencode({ enabled = false })
+}
+
 resource "aws_cloudwatch_log_group" "update_event_source" {
   name = "/aws/lambda/${aws_lambda_function.update_event_source.function_name}"
 
@@ -60,9 +95,9 @@ resource "aws_iam_role" "lambda_update_event_source" {
   })
 
   inline_policy {
-    name = "policy-update-event-source"
+    name   = "policy-update-event-source"
     policy = jsonencode({
-      Version = "2012-10-17"
+      Version   = "2012-10-17"
       Statement = [
         {
           Action   = "lambda:listEventSourceMappings"
@@ -79,6 +114,14 @@ resource "aws_iam_role" "lambda_update_event_source" {
       ]
     })
   }
+}
+
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.update_event_source.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.open_circuit_rule.arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
