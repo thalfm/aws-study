@@ -37,6 +37,7 @@ module "recorrencia" {
 module "circuit_breaker_recorrencia" {
     source = "../../infra/circuit-breaker"
     target_function_name = "consumidor-processamento"
+    target_function_arn = "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:consumidor-processamento"
     target_queue_name = module.recorrencia.aws_sqs_queue_recorrencia_name
     target_queue_arn = module.recorrencia.aws_sqs_queue_recorrencia_arn
     region = "${var.region}"
